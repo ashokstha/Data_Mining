@@ -37,69 +37,49 @@ def main():
     print("Inverse Covariance:\ninv_cov1: \n{0}\ninv_cov2:\n {1}\ninv_cov:\n {2}\n".format(inv_cov1, inv_cov2, inv_cov))
 
     '''
-        LDA calculations:
+        LDA calculations: using matrices
     '''
-    # mean_1 = [0, 0]
-    # mean_2 = [3, 4]
-    # inv_cov = [[2, -1], [-1, 3]]
-
     [m11, m12] = mean_1
     [m21, m22] = mean_2
 
     [[a, b], [c, d]] = inv_cov
 
     # co-efficients of decision variable
-    b0 = ((m11 ** 2 - m21 ** 2) * a + (m12 ** 2 - m22 ** 2) * d + (m11 * m12 - m21 * m22) * (b + c)) / 2
-    b1 = -(2 * (m11 - m21) * a + (m12 - m22) * (b + c)) / 2
-    b2 = -(2 * (m12 - m22) * d + (m11 - m21) * (b + c)) / 2
+    b0 = (np.array(mean_1.dot(inv_cov)).dot(mean_1.T) - np.array(mean_2.dot(inv_cov)).dot(mean_2.T))
+    b1, b2 = (inv_cov.dot(mean_2.T - mean_1.T) - (mean_1 - mean_2).dot(inv_cov))
 
     print("LDA: coeffiecients: ", b0, b1, b2)
     print("Equation:\n {0} * x1 + {1} * x2 + {2} = 0\n".format(b1, b2, b0))
 
     # x_val = 0
     # y_val = (b1 * x_val + b0)/b2
-
     line = [-((b1 * x_val + b0) / b2) for x_val in x]
-    # print(line)
 
     plt.scatter(x, y, c=label)
     plt.plot(x, line, color='red', linewidth=1)
+    #plt.show()
 
     '''
-        QDA calculations:
+        QDA Calculations: using matrices
     '''
-    [[a1, b1], [c1, d1]] = inv_cov1
-    [[a2, b2], [c2, d2]] = inv_cov2
-
-    # co-efficients of decision variable
-    b0 = -((m11 ** 2 - m21 ** 2) * (a1 - a2) + (m12 ** 2 - m22 ** 2) * (d1 - d2) + (m11 * m12 - m21 * m22) * (
-            b1 - b2 + c1 - c2))
-    bx1 = (2 * (m11 - m21) * (a1 - a2) + (m12 - m22) * (b1 - b2 + c1 - c2))
-    bx2 = (2 * (m12 - m22) * (d1 - d2) + (m11 - m21) * (b1 - b2 + c1 - c2))
-    bx1_sq = (a1 - a2)
-    bx2_sq = (d1 - d2)
-    bx1_x2 = (b1 - b2 + c1 - c2)
+    b0 = (np.array(mean_1.dot(inv_cov1)).dot(mean_1.T) - np.array(mean_2.dot(inv_cov2)).dot(mean_2.T))
+    bx1, bx2 = (inv_cov2.dot(mean_2.T) - inv_cov1.dot(mean_1.T) - mean_1.dot(inv_cov1) + mean_2.dot(inv_cov2))
+    inv = inv_cov1 - inv_cov2
+    bx1_sq = inv[0][0]
+    bx2_sq = inv[1][1]
+    bx1_x2 = inv[0][1] + inv[1][0]
 
     print("QDA Equation:\n {0} * x1^2 + {1} * x2^2 + {2} * x1 * x2 + {3} * x1 + {4} * x2 + {5} = 0\n".format(bx1_sq,
                                                                                                              bx2_sq,
                                                                                                              bx1_x2,
                                                                                                              bx1,
                                                                                                              bx2, b0))
-
-    # x_val = 0
-    # y_val = (b1 * x_val + b0)/b2
-
-    line = [-((b1 * x_val + b0) / b2) for x_val in x]
-    qda_eqn = "{0} * x1^2 + {1} * x2^2 + {2} * x1 * x2 + {3} * x1 + {4} * x2 + {5} = 0\n".format(bx1_sq, bx2_sq,
-                                                                                                 bx1_x2, bx1,
-                                                                                                 bx2, b0)
-
     for i in x:
         qda_eqn = "{0} + {1} * i**2 + {2} * i + {3} + {4} * i + {5}".format(bx1_sq * (i * i), bx2_sq,
                                                                             bx1_x2 * i, bx1 * i,
                                                                             bx2, b0)
         y = eval(qda_eqn)
-        #print(qda_eqn,y)
+        # print(qda_eqn,y)
         plt.scatter(i, y, color='green', marker=".")
 
     plt.show()
