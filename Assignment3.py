@@ -57,7 +57,7 @@ def main():
 
     plt.scatter(x, y, c=label)
     plt.plot(x, line, color='red', linewidth=1)
-    #plt.show()
+    # plt.show()
 
     '''
         QDA Calculations: using matrices
@@ -69,15 +69,20 @@ def main():
     bx2_sq = inv[1][1]
     bx1_x2 = inv[0][1] + inv[1][0]
 
+    #b0 = 0
     print("QDA Equation:\n {0} * x1^2 + {1} * x2^2 + {2} * x1 * x2 + {3} * x1 + {4} * x2 + {5} = 0\n".format(bx1_sq,
                                                                                                              bx2_sq,
                                                                                                              bx1_x2,
                                                                                                              bx1,
                                                                                                              bx2, b0))
     for i in x:
+        '''
         qda_eqn = "{0} + {1} * i**2 + {2} * i + {3} + {4} * i + {5}".format(bx1_sq * (i * i), bx2_sq,
                                                                             bx1_x2 * i, bx1 * i,
                                                                             bx2, b0)
+                                                                            '''
+        qda_eqn = "{0} + {1} * i**2 + {2} * i".format(bx1_sq * (i * i) + b0 + bx1 * i, bx2_sq,
+                                                                    bx2+ bx1_x2 * i)
         y = eval(qda_eqn)
         # print(qda_eqn,y)
         plt.scatter(i, y, color='green', marker=".")
